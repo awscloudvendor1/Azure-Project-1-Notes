@@ -1,0 +1,74 @@
+1) Create VM and Setup Jenkins, Azure CLI and Docker in It
+==========================================================
+sudo apt update
+sudo apt upgrade
+sudo apt install openjdk-17-jre
+java -version
+
+2) Install Jenkins
+===================================
+curl -fsSL https://pkg.jenkins.io/debian/jenkins.io-2023.key | sudo tee \
+  /usr/share/keyrings/jenkins-keyring.asc > /dev/null
+echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] \
+  https://pkg.jenkins.io/debian binary/ | sudo tee \
+  /etc/apt/sources.list.d/jenkins.list > /dev/null
+sudo apt-get update
+sudo apt-get install jenkins
+
+sudo systemctl enable jenkins       //Enable the Jenkins service to start at boot
+sudo systemctl start jenkins        //Start Jenkins as a service
+systemctl status jenkins
+
+3 ) Install Azure CLI
+Refer --- https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-linux?pivots=apt
+curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+
+4 ) Install Docker
+sudo apt-get install docker.io
+sudo usermod -aG docker $USER
+sudo usermod -aG docker jenkins
+sudo init 6
+
+5) Create a ACR Container Registry
+======================================
+create Acr
+Access Keys ---> Notedown access key and username and password
+enable admin user
+go to jenkins install plugins (azurecli)
+Security---> credentails (store the azure acr credentails)
+
+6) Create a Azure Active Directory App Registration
+=================================================
+Active directory ---> app registration --> new registration --> name = forjenkins --> Register
+Certificates and secrets ---> New client secret ----> Container
+Set the Permissions ---> subnscriptions ---> add ---> role assingments ---> Priviledges administrator roles ---> Contributer ---> Search name of the service principle --> select name --->
+Review and Assign
+
+7) Add those Azure service principle credentails in azure
+====================================================================
+add the credentails from the azure service principles ---> Verify
+
+8) Create a Project in jenkins
+=======================================
+Create a Freestyle Project ---> select he gitrepo (https://github.com/awscloudvendor1/Tetris-Game-App.git) ---> branch (main) ---> Addbuildstep (Executeshell) 
+add (rm -rf Tetris-Game-App 
+     git clone https://github.com/awscloudvendor1/Tetris-Game-App.git
+     docker build -t myacr100.azurecr.io/tetris-game-app:latest .
+
+9) Create a Build step and select azurecli
+===================================================
+command-1  = az acr login -n myacr100
+command-2 = docker push myacr100.azurecr.io/tetris-game-app:latest
+save and apply
+Build the Jenkins   
+Go to the azure container and see the container running
+
+10) Create a WebApp
+=========================
+Create a Web-app with the docker container and select linux
+and select tha acr container registry and run the web app
+The container app should be running successfully
+
+
+     
+
